@@ -1,0 +1,36 @@
+{
+  "schoolName": "Salwan Public School",
+  "contact": {
+    "officePhone": "555-123-4567",
+    "nursePhone": "555-123-4568",
+    "principal": "Capt. Richa Sharma Katyal (Retd)"
+  },
+  "hours": {
+    "schoolDay": "8:30 AM - 3:00 PM"
+  },
+  "policies": {
+    "absences": "If you are absent, please inform the class teacher. If you are absent for medical reasons, a medical certificate is required to be posted with a leave application on Edunext.",
+    "dressCode": "Students are required to wear the school uniform every day. There are no exceptions for any special events. This includes the ID card, belt, shoes and socks. If your ward is attending coachings, they must change into the school uniform after the SDP period.",
+    "homework": "Homework is assigned daily and must be submitted the next day. If a student is absent, they are responsible for catching up on missed homework.",
+    "discipline": "Students are expected to maintain discipline at all times. Any form of bullying, harassment, or misconduct will not be tolerated and may result in disciplinary action.",
+    "mobilePhones": "Mobile phones are not allowed in school. If a student is found with a mobile phone, it will be confiscated and returned only to the parent after a meeting with the principal.",
+    "foodPolicy": "Students are encouraged to bring healthy snacks and lunch. Junk food is discouraged. The school provides a midday meal service that offers nutritious meals.",
+    "transport": "The school provides transportation services for students. Parents must register their children for bus service at the beginning of the school year. Alternatively, students can use third party vans or can be picked and dropped by parents or guardians.",
+    "safety": "The school has a strict safety policy. All visitors must sign in at the front desk and wear a visitor badge. Students must not leave the school premises without permission.",
+    "emergencyContacts": "In case of an emergency, parents will be contacted immediately. If a parent cannot be reached, the school will contact the emergency contacts provided by the parents.",
+    "events": "The school organizes various events throughout the year, including sports day, cultural programs, and parent-teacher meetings. Parents are encouraged to participate and support their children.",
+    "academicPerformance": "The school follows a continuous assessment system. Parents can check their child's academic performance through the school's online portal. Regular parent-teacher meetings are held to discuss academic progress.",
+    "extracurricularActivities": "The school encourages students to participate in extracurricular activities such as sports, music, and arts. These activities are essential for the overall development of the students."
+  },
+  "about": "Education is the foundation of progress in every society and the quality of education imparted is what dictates its growth. School plays a significant role in shaping the future of next generations. It inspires students to be curious about the world they live in,as well as, enables them to discover their strengths, identify their inherent talents and reach their innate potential.\n\nAt Salwan Public School, we believe in creating a holistic, experiential, and student-centric educational system. Keeping in with the adage, ‘Learning is more than acquiring facts, it is acquiring understanding’, we ensure that each day is a new and comprehensive learning experience for our students.\n\nChildren are born explorers. When they are young, all they want is to push boundaries and explore the limits of what they can do and achieve. At Salwan, our goal is to ensure that each student becomes a critical thinker, problem-solver, diligent researcher, and an inspirational leader of tomorrow.\n\nBesides academic excellence, Salwanians are nurtured to be socially responsible, morally strong, and ethically upright. Tradition, values, and pride for the nation are the guiding principles on which rests our core strength. We teach them to value experiences and not material possessions. These values are meant to serve as a moral compass for our children, preparing them to face the challenges in life boldly and gain valued outcomes such as their personal and professional growth.\n\nOver the last quarter of a century, the school has grown in size and strength. It has surpassed its own benchmarks by nurturing pioneers, and has fostered an environment for students to achieve trailblazing targets. With the continued support and cooperation of parents and every member of the Salwan fraternity, I am confident that we will continue to strive higher, achieve our goals, and work in unison towards a common vision – SERVICE BEFORE SELF.\n\nCapt. Richa Sharma Katyal (Retd.)",
+  "erpsystem": {
+    "name": "Edunext",
+    "url": "https://spsmv.edunexttechnologies.com/",
+    "features": [
+      "Attendance tracking",
+      "Homework assignments",
+      "Fee management",
+      "Parent-teacher communication"
+    ]
+  }
+}
