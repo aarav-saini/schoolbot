@@ -1,11 +1,23 @@
 // public/script.js - Frontend Logic
 document.addEventListener("DOMContentLoaded", () => {
+    const loginContainer = document.getElementById("login-container");
+    const accessTokenInput = document.getElementById("access-token-input");
+    const loginButton = document.getElementById("login-button");
+    const loginErrorMessage = document.getElementById("login-error-message");
+
+    const chatInterface = document.getElementById("chat-interface");
     const userInput = document.getElementById("user-input");
     const sendButton = document.getElementById("send-button");
-    const voiceButton = document.getElementById("voice-button"); // Get the new voice button
+    const voiceButton = document.getElementById("voice-button");
     const chatWindow = document.getElementById("chat-window");
     const loadingIndicator = document.getElementById("loading-indicator");
     const errorMessage = document.getElementById("error-message");
+    const logoutButton = document.getElementById("logout-button");
+
+    // !!! NEW: TTS Speed Elements !!!
+    const ttsSpeedSlider = document.getElementById("tts-speed-slider");
+    const ttsSpeedValueSpan = document.getElementById("tts-speed-value");
+    let ttsSpeed = parseFloat(ttsSpeedSlider.value); // Initialize with slider's default value
 
     let recognition; // Variable for SpeechRecognition
     let synth = window.speechSynthesis; // Variable for SpeechSynthesis
@@ -13,10 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Function to set the Indian voice
     function setIndianVoice() {
-        // Get voices after they are loaded
         const voices = synth.getVoices();
-        // Look for an English (India) voice. Common language codes: 'en-IN', 'en_IN'
-        // Some browsers might just offer a generic 'en' voice with an Indian accent.
         indianVoice = voices.find(
             (voice) =>
                 voice.lang === "en-IN" ||
@@ -28,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
             console.warn(
                 "Indian English voice not found. Falling back to default English voice."
             );
-            // Fallback to a generic English voice if Indian one isn't found
             indianVoice = voices.find(
                 (voice) =>
                     voice.lang === "en-US" || voice.lang.startsWith("en-")
@@ -36,17 +44,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!indianVoice && voices.length > 0) {
-            // If no specific English voice, just pick the first available voice
             indianVoice = voices[0];
         }
     }
 
-    // Event listener for when voices are loaded/changed
-    // This is crucial because voices might not be immediately available
     synth.onvoiceschanged = setIndianVoice;
-
-    // Call setIndianVoice once on load, in case voices are already loaded
-    // And also ensure it's called after the 'onvoiceschanged' event fires.
     if (synth.getVoices().length > 0) {
         setIndianVoice();
     }
@@ -59,14 +61,14 @@ document.addEventListener("DOMContentLoaded", () => {
         console.warn(
             "Web Speech API Speech Recognition not supported in this browser."
         );
-        voiceButton.style.display = "none"; // Hide the button if not supported
+        voiceButton.style.display = "none";
     } else {
         const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
         recognition = new SpeechRecognition();
-        recognition.continuous = false; // Recognizes a single utterance
-        recognition.interimResults = false; // Only returns final results
-        recognition.lang = "en-IN"; // Set STT language to Indian English
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.lang = "en-IN";
 
         recognition.onstart = () => {
             voiceButton.textContent = "🔴 Speaking...";
@@ -78,8 +80,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            userInput.value = transcript; // Put the spoken text into the input field
-            sendMessage(); // Send the message automatically
+            userInput.value = transcript;
+            sendMessage();
             userInput.placeholder = "Type your message...";
         };
 
@@ -106,14 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
     // TTS Function
     function speakText(text) {
         if (!synth || !indianVoice) {
-            // Check if synth and a voice are available
             console.warn("Speech Synthesis or Indian voice not ready.");
             return;
         }
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.voice = indianVoice; // Assign the found Indian voice
-        utterance.lang = indianVoice.lang; // Set lang based on the chosen voice
+        utterance.voice = indianVoice;
+        utterance.lang = indianVoice.lang;
+        utterance.rate = ttsSpeed; // !!! NEW: Apply TTS speed !!!
 
         utterance.onerror = (event) => {
             console.error("SpeechSynthesisUtterance.onerror", event.error);
@@ -153,8 +155,6 @@ document.addEventListener("DOMContentLoaded", () => {
         chatWindow.scrollTop = chatWindow.scrollHeight;
 
         if (speak && sender === "Bot") {
-            // Only speak bot responses
-            // Remove HTML tags for speech synthesis
             const textOnlyMessage = message.replace(/<[^>]*>/g, "");
             speakText(textOnlyMessage);
         }
@@ -162,39 +162,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
     async function sendMessage() {
         const prompt = userInput.value.trim();
+        const storedAccessToken = localStorage.getItem("accessToken");
 
         if (!prompt) {
             return;
         }
 
+        if (!storedAccessToken) {
+            errorMessage.textContent = "Not logged in. Please log in to chat.";
+            errorMessage.classList.remove("hidden");
+            return;
+        }
+
         errorMessage.classList.add("hidden");
-
         appendMessage("User", prompt, "text-gray-800", false);
-
         userInput.value = "";
-
         loadingIndicator.classList.remove("hidden");
         sendButton.disabled = true;
-        voiceButton.disabled = true; // Disable voice during bot processing
+        voiceButton.disabled = true;
 
         try {
             const response = await fetch("/ask", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${storedAccessToken}`,
                 },
                 body: JSON.stringify({ prompt: prompt }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
+                if (response.status === 401 || response.status === 403) {
+                    logoutUser(true);
+                    throw new Error(
+                        "Authentication failed. Please log in again."
+                    );
+                }
                 throw new Error(
                     errorData.error || `HTTP error! status: ${response.status}`
                 );
             }
 
             const data = await response.json();
-            // Pass true to `speak` to activate TTS for bot responses
             appendMessage("Bot", data.response, "text-blue-600", true, true);
         } catch (error) {
             console.error("Error sending message:", error);
@@ -206,26 +216,105 @@ document.addEventListener("DOMContentLoaded", () => {
                 "Sorry, I encountered an error. Please try again.",
                 "text-red-500",
                 false,
-                true // Also speak error messages
+                true
             );
         } finally {
             loadingIndicator.classList.add("hidden");
             sendButton.disabled = false;
-            voiceButton.disabled = false; // Re-enable voice button
+            voiceButton.disabled = false;
             userInput.focus();
         }
     }
 
+    // Login Function
+    async function login() {
+        const accessToken = accessTokenInput.value.trim();
+        loginErrorMessage.classList.add("hidden");
+
+        if (!accessToken) {
+            loginErrorMessage.textContent = "Please enter an access token.";
+            loginErrorMessage.classList.remove("hidden");
+            return;
+        }
+
+        try {
+            const response = await fetch("/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ accessToken: accessToken }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(
+                    errorData.error ||
+                        `Login failed with status: ${response.status}`
+                );
+            }
+
+            localStorage.setItem("accessToken", accessToken);
+            showChatInterface();
+            appendMessage(
+                "Bot",
+                "Hello! How can I assist you with SPSMV school information today?",
+                "text-blue-600",
+                false,
+                false
+            );
+            userInput.focus();
+        } catch (error) {
+            console.error("Login error:", error);
+            loginErrorMessage.textContent = error.message;
+            loginErrorMessage.classList.remove("hidden");
+        }
+    }
+
+    // UI Visibility Functions
+    function showLoginScreen() {
+        loginContainer.classList.remove("hidden");
+        chatInterface.classList.add("hidden");
+        accessTokenInput.focus();
+        loginErrorMessage.classList.add("hidden");
+        chatWindow.innerHTML = "";
+    }
+
+    function showChatInterface() {
+        loginContainer.classList.add("hidden");
+        chatInterface.classList.remove("hidden");
+        errorMessage.classList.add("hidden");
+    }
+
+    // Logout Function
+    function logoutUser(showAuthError = false) {
+        localStorage.removeItem("accessToken");
+        showLoginScreen();
+        if (showAuthError) {
+            loginErrorMessage.textContent =
+                "Your session expired or token is invalid. Please log in again.";
+            loginErrorMessage.classList.remove("hidden");
+        }
+    }
+
+    // Event Listeners
+    loginButton.addEventListener("click", login);
+    logoutButton.addEventListener("click", () => logoutUser(false));
+
+    accessTokenInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") {
+            login();
+        }
+    });
+
     sendButton.addEventListener("click", sendMessage);
 
-    // Event listener for the new voice button
     voiceButton.addEventListener("click", () => {
         if (recognition) {
-            // Stop any ongoing speech synthesis if the user wants to speak
             if (synth.speaking) {
                 synth.cancel();
             }
-            recognition.start(); // Start listening
+            recognition.start();
         }
     });
 
@@ -235,14 +324,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    userInput.focus();
+    // !!! NEW: TTS Speed Slider Event Listener !!!
+    ttsSpeedSlider.addEventListener("input", (event) => {
+        ttsSpeed = parseFloat(event.target.value);
+        ttsSpeedValueSpan.textContent = `${ttsSpeed.toFixed(1)}x`; // Update display
+    });
 
-    // Initial greeting, spoken aloud
-    appendMessage(
-        "Bot",
-        "Hello! How can I assist you with SPSMV school information today?",
-        "text-blue-600",
-        false,
-        false
-    );
+    // On page load, check if already logged in
+    const initialToken = localStorage.getItem("accessToken");
+    if (initialToken) {
+        showChatInterface();
+        appendMessage(
+            "Bot",
+            "Welcome back! How can I assist you with SPSMV school information today?",
+            "text-blue-600",
+            false,
+            false
+        );
+        userInput.focus();
+    } else {
+        showLoginScreen();
+    }
 });

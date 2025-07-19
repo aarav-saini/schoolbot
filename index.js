@@ -3,7 +3,7 @@ const express = require("express");
 const { GoogleGenAI } = require("@google/genai");
 const dotenv = require("dotenv");
 const fs = require("fs/promises");
-const path = require("path"); // Import path module
+const path = require("path");
 
 dotenv.config(); // Load environment variables from .env file
 
@@ -12,6 +12,16 @@ const port = process.env.PORT || 3000; // Use port from environment or default t
 
 // Initialize Google GenAI with API key
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+const REQUIRED_ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+if (!REQUIRED_ACCESS_TOKEN) {
+    console.error(
+        "Error: ACCESS_TOKEN is not set in environment variables. Please set it in your .env file."
+    );
+    process.exit(1);
+} else {
+    console.log("Access token loaded successfully for server-side validation.");
+}
 
 let schoolData; // Variable to hold the loaded school data
 
@@ -27,7 +37,6 @@ app.use(express.static(path.join(__dirname, "public")));
  * that need to be rendered as actual line breaks in HTML.
  */
 app.use((req, res, next) => {
-    // Override res.json to intercept and modify the response before sending
     const originalJson = res.json;
     res.json = function (body) {
         if (
@@ -36,20 +45,18 @@ app.use((req, res, next) => {
             body.response &&
             typeof body.response === "string"
         ) {
-            // Check if the content is likely plain text with newlines
-            // and not already well-formed HTML (e.g., containing <table>)
-            // This is a heuristic; you might need to refine it based on AI output patterns.
             if (
                 !body.response.includes("<br>") &&
-                !body.response.includes("<table")
+                !body.response.includes("<table") &&
+                !body.response.includes("<p>") &&
+                !body.response.includes("<div")
             ) {
-                // Replace all occurrences of \n with <br>
                 body.response = body.response.replace(/\n/g, "<br>");
             }
         }
-        originalJson.call(this, body); // Call the original json method to send the response
+        originalJson.call(this, body);
     };
-    next(); // Continue to the next middleware or route handler
+    next();
 });
 
 /**
@@ -66,7 +73,6 @@ async function loadSchoolData() {
         console.log("School data loaded successfully.");
     } catch (error) {
         console.error("Failed to load school data:", error);
-        // Exit the process if school data cannot be loaded, as it's critical for the app
         console.log(
             "Error: Could not load school information. Please ensure 'school_data.json' exists and is accessible."
         );
@@ -74,34 +80,79 @@ async function loadSchoolData() {
     }
 }
 
+// Login Endpoint
+app.post("/login", (req, res) => {
+    const { accessToken } = req.body;
+    const clientIp = req.ip; // Get client IP
+
+    if (!accessToken) {
+        console.warn(`[${clientIp}] Login failed: Access token is required.`);
+        return res.status(400).json({ error: "Access token is required." });
+    }
+
+    if (accessToken === REQUIRED_ACCESS_TOKEN) {
+        console.log(`[${clientIp}] Login successful.`);
+        return res.json({ message: "Login successful!" });
+    } else {
+        console.warn(`[${clientIp}] Login failed: Invalid access token.`);
+        return res.status(401).json({ error: "Invalid access token." });
+    }
+});
+
+// Authentication Middleware
+function authenticateToken(req, res, next) {
+    const clientIp = req.ip; // Get client IP
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+
+    if (token == null) {
+        console.warn(`[${clientIp}] Access token required for /ask endpoint.`);
+        return res.status(401).json({ error: "Access token required." });
+    }
+
+    if (token !== REQUIRED_ACCESS_TOKEN) {
+        console.warn(
+            `[${clientIp}] Forbidden: Invalid access token provided for /ask endpoint.`
+        );
+        return res
+            .status(403)
+            .json({ error: "Forbidden: Invalid access token." });
+    }
+
+    next();
+}
+
 /**
  * Handles incoming POST requests to the /ask endpoint.
  * Processes user prompts using the Google GenAI model and returns a response.
+ * Now protected by authenticateToken middleware.
  */
-app.post("/ask", async (req, res) => {
-    // Check if school data is loaded before processing requests
+app.post("/ask", authenticateToken, async (req, res) => {
+    const clientIp = req.ip; // Get client IP
+
     if (!schoolData) {
+        console.error(
+            `[${clientIp}] Server error: School data not loaded for /ask request.`
+        );
         return res.status(503).json({
             error: "Server is initializing, school data not yet loaded.",
         });
     }
 
-    const userPrompt = req.body.prompt; // Get the prompt from the request body
+    const userPrompt = req.body.prompt;
 
-    // Validate if a prompt was provided
     if (!userPrompt || userPrompt.trim() === "") {
+        console.warn(`[${clientIp}] Bad request: Prompt cannot be empty.`);
         return res.status(400).json({ error: "Prompt cannot be empty." });
     }
 
-    console.log(`User query received: "${userPrompt}"`);
+    console.log(`[${clientIp}] User query received: "${userPrompt}"`);
 
     try {
-        // Define the system instruction for the AI model.  Key change here.
-        const systemInstruction = `You are a helpful school parent assistant. Your role is to answer questions from parents based ONLY on the provided JSON data. If the user is asking about fees, use HTML tables to display fee structures for different classes and other fee information. Use <b></b> for bold text. Use <br> for newlines. Use HTML table tags (<table>, <tr>, <td>, <th>). If the answer is not in the data, politely state that you do not have that information. Do not make up information. Always ask for the context from the user. The current date is ${new Date().toDateString()}. Do not use markdown. Always use HTML tags.`;
+        const systemInstruction = `You are a school receptionist. If the answer is not in the data, politely state that you do not have that information. Do not make up informatio. Never mention that you have been provided context. Always just give the answer from the given context, as if you were a trained AI model The current date is ${new Date().toDateString()}.`;
 
-        // Generate content using the Google GenAI model
         const responseStream = await ai.models.generateContentStream({
-            model: "gemini-2.5-flash", // Using gemini-2.5-flash as specified in the original code
+            model: "gemini-2.5-flash",
             contents: [
                 {
                     role: "user",
@@ -114,22 +165,22 @@ app.post("/ask", async (req, res) => {
             ],
             generationConfig: {
                 systemInstruction: systemInstruction,
-                maxOutputTokens: 75, // Increased tokens to account for the table generation. Adjust if needed.
+                maxOutputTokens: 100,
             },
         });
 
         let botResponse = "";
-        // Stream the response chunks and concatenate them
         for await (const chunk of responseStream) {
             botResponse += chunk.text;
         }
 
-        console.log(`Bot response (raw): "${botResponse}"`); // Log raw response before middleware
-        // Send the AI's response back to the client as JSON
-        res.json({ response: botResponse }); // The middleware will now process this before sending
+        console.log(`[${clientIp}] Bot response (raw): "${botResponse}"`);
+        res.json({ response: botResponse });
     } catch (error) {
-        console.error("AI Error:", error);
-        // Send an error response to the client
+        console.error(
+            `[${clientIp}] AI Error for prompt "${userPrompt}":`,
+            error
+        );
         res.status(500).json({
             error: "Sorry, I encountered an error while processing your request. Please try again.",
         });
@@ -140,11 +191,12 @@ app.post("/ask", async (req, res) => {
  * Initializes the server: loads school data and starts listening for requests.
  */
 async function initialize() {
-    await loadSchoolData(); // Load school data first
+    await loadSchoolData();
     app.listen(port, () => {
         console.log(`Server is running on http://localhost:${port}`);
         console.log(`Access the application at http://localhost:${port}`);
+        console.log(`Please enter your ACCESS_TOKEN to proceed.`);
     });
 }
 
-initialize(); // Call the initialize function to start the server
+initialize();
