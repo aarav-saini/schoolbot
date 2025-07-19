@@ -1,28 +1,44 @@
 {
-  "schoolName": "Salwan Public School",
+  "schoolName": "Salwan Public School, Mayur Vihar",
+  "address": "Kondli Gharoli Complex, Mayur Vihar, Phase - 3, New Delhi, Delhi, India - 110096",
   "contact": {
-    "officePhone": "555-123-4567",
-    "nursePhone": "555-123-4568",
-    "principal": "Capt. Richa Sharma Katyal (Retd)"
+    "officePhone": "+91 11 - 46612484, 35007670, 35007669",
+    "principal": "Capt. Richa Sharma Katyal (Retd)",
+    "email": "spsmayurvihar@salwanschools.com",
+    "principalEmail": "principal.spsmayurvihar@salwanschools.com",
+    "accountsMobile": "8130035406"
   },
   "hours": {
-    "schoolDay": "8:30 AM - 3:00 PM"
+    "schoolDay": "8:30 AM - 3:00 PM",
+    "officeHours": {
+      "Monday": "8:00 AM - 4:00 AM",
+      "Tuesday": "8:00 AM - 2:30 PM",
+      "Wednesday": "8:00 AM - 2:30 PM",
+      "Thursday": "8:00 AM - 2:30 PM",
+      "Friday": "8:00 AM - 2:30 PM",
+      "Saturday": "8:00 AM - 2:00 PM",
+      "Sunday": "Closed"
+    }
   },
   "policies": {
     "absences": "If you are absent, please inform the class teacher. If you are absent for medical reasons, a medical certificate is required to be posted with a leave application on Edunext.",
     "dressCode": "Students are required to wear the school uniform every day. There are no exceptions for any special events. This includes the ID card, belt, shoes and socks. If your ward is attending coachings, they must change into the school uniform after the SDP period.",
     "homework": "Homework is assigned daily and must be submitted the next day. If a student is absent, they are responsible for catching up on missed homework.",
-    "discipline": "Students are expected to maintain discipline at all times. Any form of bullying, harassment, or misconduct will not be tolerated and may result in disciplinary action.",
+    "discipline": "Students are expected to maintain discipline at all times. Any form of bullying, harassment, or misconduct will not be tolerated and may result in disciplinary action. The school has an Anti-Bullying Committee.",
     "mobilePhones": "Mobile phones are not allowed in school. If a student is found with a mobile phone, it will be confiscated and returned only to the parent after a meeting with the principal.",
-    "foodPolicy": "Students are encouraged to bring healthy snacks and lunch. Junk food is discouraged. The school provides a midday meal service that offers nutritious meals.",
-    "transport": "The school provides transportation services for students. Parents must register their children for bus service at the beginning of the school year. Alternatively, students can use third party vans or can be picked and dropped by parents or guardians.",
-    "safety": "The school has a strict safety policy. All visitors must sign in at the front desk and wear a visitor badge. Students must not leave the school premises without permission.",
+    "foodPolicy": "Students are encouraged to bring healthy snacks and lunch. Junk food is discouraged. The school provides a midday meal service that offers nutritious meals. Meal plans are published monthly.",
+    "transport": "The school provides transportation services for students on a 'No profit, No loss' basis. Parents must register their children for bus service at the beginning of the school year. Alternatively, students can use third party vans or can be picked and dropped by parents or guardians. Routes/stops may change based on traffic and student enrollment.",
+    "safety": "The school has a strict safety policy. All visitors must sign in at the front desk and wear a visitor badge. Students must not leave the school premises without permission. The school has a School Safety Committee, conducts periodic fire/disaster drills, and has CCTV cameras at strategic locations. Children are educated about 'good touch and bad touch'.",
     "emergencyContacts": "In case of an emergency, parents will be contacted immediately. If a parent cannot be reached, the school will contact the emergency contacts provided by the parents.",
     "events": "The school organizes various events throughout the year, including sports day, cultural programs, and parent-teacher meetings. Parents are encouraged to participate and support their children.",
     "academicPerformance": "The school follows a continuous assessment system. Parents can check their child's academic performance through the school's online portal. Regular parent-teacher meetings are held to discuss academic progress.",
-    "extracurricularActivities": "The school encourages students to participate in extracurricular activities such as sports, music, and arts. These activities are essential for the overall development of the students."
+    "extracurricularActivities": "The school encourages students to participate in extracurricular activities such as sports, music, and arts. These activities are essential for the overall development of the students. A wide range of clubs and sports coaching are offered, both paid and unpaid.",
+    "admissions": {
+      "criteria": "Fair, transparent, and based on merit and aptitude of each applicant, strictly adhering to DoE guidelines.",
+      "classesOpen": "Nursery to IX & XI (Admissions for Class XI (2025-2026) are open)."
+    }
   },
-  "about": "Education is the foundation of progress in every society and the quality of education imparted is what dictates its growth. School plays a significant role in shaping the future of next generations. It inspires students to be curious about the world they live in,as well as, enables them to discover their strengths, identify their inherent talents and reach their innate potential.\n\nAt Salwan Public School, we believe in creating a holistic, experiential, and student-centric educational system. Keeping in with the adage, ‘Learning is more than acquiring facts, it is acquiring understanding’, we ensure that each day is a new and comprehensive learning experience for our students.\n\nChildren are born explorers. When they are young, all they want is to push boundaries and explore the limits of what they can do and achieve. At Salwan, our goal is to ensure that each student becomes a critical thinker, problem-solver, diligent researcher, and an inspirational leader of tomorrow.\n\nBesides academic excellence, Salwanians are nurtured to be socially responsible, morally strong, and ethically upright. Tradition, values, and pride for the nation are the guiding principles on which rests our core strength. We teach them to value experiences and not material possessions. These values are meant to serve as a moral compass for our children, preparing them to face the challenges in life boldly and gain valued outcomes such as their personal and professional growth.\n\nOver the last quarter of a century, the school has grown in size and strength. It has surpassed its own benchmarks by nurturing pioneers, and has fostered an environment for students to achieve trailblazing targets. With the continued support and cooperation of parents and every member of the Salwan fraternity, I am confident that we will continue to strive higher, achieve our goals, and work in unison towards a common vision – SERVICE BEFORE SELF.\n\nCapt. Richa Sharma Katyal (Retd.)",
+  "about": "Education is the foundation of progress in every society and the quality of education imparted is what dictates its growth. School plays a significant role in shaping the future of next generations. It inspires students to be curious about the world they live in, as well as, enables them to discover their strengths, identify their inherent talents and reach their innate potential.\n\nAt Salwan Public School, we believe in creating a holistic, experiential, and student-centric educational system. Keeping in with the adage, ‘Learning is more than acquiring facts, it is acquiring understanding’, we ensure that each day is a new and comprehensive learning experience for our students.\n\nChildren are born explorers. When they are young, all they want is to push boundaries and explore the limits of what they can do and achieve. At Salwan, our goal is to ensure that each student becomes a critical thinker, problem-solver, diligent researcher, and an inspirational leader of tomorrow.\n\nBesides academic excellence, Salwanians are nurtured to be socially responsible, morally strong, and ethically upright. Tradition, values, and pride for the nation are the guiding principles on which rests our core strength. We teach them to value experiences and not material possessions. These values are meant to serve as a moral compass for our children, preparing them to face the challenges in life boldly and gain valued outcomes such as their personal and professional growth.\n\nOver the last quarter of a century, the school has grown in size and strength. It has surpassed its own benchmarks by nurturing pioneers, and has fostered an environment for students to achieve trailblazing targets. With the continued support and cooperation of parents and every member of the Salwan fraternity, I am confident that we will continue to strive higher, achieve our goals, and work in unison towards a common vision – SERVICE BEFORE SELF.\n\nCapt. Richa Sharma Katyal (Retd.)",
   "erpsystem": {
     "name": "Edunext",
     "url": "https://spsmv.edunexttechnologies.com/",
@@ -30,7 +46,127 @@
       "Attendance tracking",
       "Homework assignments",
       "Fee management",
-      "Parent-teacher communication"
+      "Parent-teacher communication",
+      "Online portal for academic performance checks"
     ]
+  },
+  "schoolDetails": {
+    "yearEstablished": 1996,
+    "affiliation": "CBSE",
+    "gradesOffered": "Nursery to Class XII",
+    "teacherStudentRatio": "1:35",
+    "mediumOfEducation": "English",
+    "languagesTaught": ["English", "Hindi", "Sanskrit", "French"],
+    "motto": "Service Before Self",
+    "board": "CBSE"
+  },
+  "infrastructure": {
+    "campusType": "Eco-friendly",
+    "environmentalFeatures": [
+      "Passive solar heating system",
+      "Ventilation pre-heating",
+      "UV exterior paint (reflects 15% heat)",
+      "CFL lights for energy reduction",
+      "Geo-exchange heating and cooling systems",
+      "Rainwater harvesting",
+      "Rubber wood or re-cycled wood furniture",
+      "Solar panels",
+      "Occupancy sensors",
+      "LED lights"
+    ],
+    "facilities": [
+      "ICT Laboratories (Junior & Senior wings)",
+      "Science Laboratories (Physics, Chemistry, Life Sciences, Biology)",
+      "Primary Section Library (approx. 6000 books)",
+      "Senior Library (over 8000 books, internet enabled workstations)",
+      "Medical Room / Infirmary",
+      "Math Lab",
+      "English Lab",
+      "Music Room",
+      "Dance Room",
+      "Art Room",
+      "Sports Complex/Playground",
+      "Gymnasium (equipped with Cross Trainers, Air Walkers, etc.)",
+      "Conference Hall",
+      "Multi-Purpose Hall (MPH)",
+      "Weather Station",
+      "Wall Climbing",
+      "Reception",
+      "Canteen",
+      "STEM Lab",
+      "Smart Classrooms",
+      "Amphitheatre",
+      "Activity Room (Montessori Wing)",
+      "Separate washrooms for students, male staff, female staff, and MTS with female attendants for students."
+    ]
+  },
+  "academicFocus": [
+    "Holistic, experiential, and student-centric educational system",
+    "Critical thinking, problem-solving, diligent research, inspirational leadership",
+    "Contemporary subjects like environmental studies, sustainable development programs, psychology",
+    "Examinations in various subjects in collaboration with the University of Cambridge",
+    "Teacher training by professors from Harvard, Stanford and Oxford Universities",
+    "Partnerships with international organizations: The British Council, Reggio Emilia Institute, Cambridge University",
+    "Cultural exchange programs with Australia, U.K., and Singapore",
+    "Projects on sustainable living with International City Auroville",
+    "Circle Time, Read to Lead Programme, DEED (Debate, Elocution, Extempore and Drama), Open Door Assessments, Olympiads"
+  ],
+  "extracurricularActivitiesDetails": {
+    "sports": [
+      "Athletics (Unpaid)",
+      "Basketball (Unpaid)",
+      "Cricket (Paid)",
+      "Football (Paid)",
+      "Gymnastics (Paid)",
+      "Golf (Paid)",
+      "Martial Arts (Paid)",
+      "Table Tennis (Paid)",
+      "Volleyball (Unpaid)",
+      "Wall Climbing (Paid)",
+      "Yoga Coaching (Unpaid)"
+    ],
+    "clubsAndArts": [
+      "ABACUS (Paid)",
+      "Chess (Paid)",
+      "Dance (Unpaid)",
+      "Music (Unpaid)",
+      "Instrumental Music (Unpaid)",
+      "Havan Club (Unpaid)",
+      "ECO Club (Unpaid)",
+      "French Club (Unpaid)",
+      "Sculpture (Paid)",
+      "Vedic Math (Paid)",
+      "Aeromodelling (Paid)"
+    ],
+    "specialPrograms": [
+      "STEM Internship at STEMROBO Technologies",
+      "Internship at CSIR-National Physical Laboratory",
+      "Three-Day Summer Training at CSIR-IGIB",
+      "Psychology Internship at Fortis Hospital"
+    ]
+  },
+  "achievements": [
+    "Ranked second among the top ten schools in East Delhi (2012)",
+    "Various State and District Level achievements in English Essay Writing, Poem Recitation (Hindi, English, Punjabi), Declamation, Vocal Light Music, Sanskrit Poem Recitation.",
+    "National level wins in All India School Contest-2023 (Vidushi Bhardwaj, Class VIII D) and Genetics for Gen Z (Dr. Shilpa Raghuvanshi, teacher)",
+    "Success in Model United Nations (MUN) conferences (e.g., SAMUN, HRMUN-2024)",
+    "Recognition for innovative teaching practices (Dr. Shilpa Raghuvanshi)",
+    "Achievements in tech-related competitions (e.g., Geek-a-Hertz)",
+    "Awarded 'Public Choice Project 2024' (Navya Sharma for STEM project at IRIS)"
+  ],
+  "committees": [
+    "Anti Bullying Committee",
+    "Tobacco Control Committee",
+    "POCSO and Child Abuse Monitoring Committee",
+    "Prevent Sexual Harassment of women at workplace and ICC (Internal Complaints Committee)",
+    "Committee to look into cases / complaints for CSA / Harassment",
+    "Inclusion Committee",
+    "Grievance Redressal Committee (for Students)",
+    "Grievance Redressal Committee (for Staff)",
+    "School Safety Committee"
+  ],
+  "visionAndMission": {
+    "vision": "To establish a work culture of creative humanism, rising above trifles, seeing others as ourselves to establish a global egalitarian society. To be among the most admired centers of education fostering academic excellence, physical fitness, psychological and spiritual health, committed to helping students for a life beyond schools. Emphasis on developing core skills for self-confidence. To create a world where all children have an education that gives them the capacity and opportunity to positively shape their own future and make a unique contribution to their local and global communities. Encouraging sound ethical values and exposure to modern and technologically driven environments, strengthening rich heritage and developing human potential for societal betterment.",
+    "mission": "Fighting ignorance through humanitarian value-based education coupled with logical thinking for honest prosperity of mind and matter. To save and groom the golden period of a child (first five years) so they enjoy it and can compete in the modern era. To impart not only knowledge but also produce compassionate, tolerant, and strong individuals. Inculcating strong ethics and moral values, and developing a technology-savvy personality."
   }
 }

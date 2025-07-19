@@ -11,6 +11,9 @@ importers:
       '@google/genai':
         specifier: ^1.10.0
         version: 1.10.0
+      openai:
+        specifier: ^5.10.1
+        version: 5.10.1(ws@8.18.3)
       say:
         specifier: ^0.16.0
         version: 0.16.0
@@ -105,6 +108,18 @@ packages:
 
   one-time@0.0.4:
     resolution: {integrity: sha512-qAMrwuk2xLEutlASoiPiAMW3EN3K96Ka/ilSXYr6qR1zSVXw2j7+yDSqGTC4T9apfLYxM3tLLjKvgPdAUK7kYQ==}
+
+  openai@5.10.1:
+    resolution: {integrity: sha512-fq6xVfv1/gpLbsj8fArEt3b6B9jBxdhAK+VJ+bDvbUvNd+KTLlA3bnDeYZaBsGH9LUhJ1M1yXfp9sEyBLMx6eA==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.23.8
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
@@ -241,6 +256,10 @@ snapshots:
       whatwg-url: 5.0.0
 
   one-time@0.0.4: {}
+
+  openai@5.10.1(ws@8.18.3):
+    optionalDependencies:
+      ws: 8.18.3
 
   safe-buffer@5.2.1: {}
 

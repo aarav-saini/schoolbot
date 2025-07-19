@@ -12,6 +12,7 @@
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
     "@google/genai": "^1.10.0",
+    "openai": "^5.10.1",
     "say": "^0.16.0"
   }
 }
