@@ -144,6 +144,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const messageContent = document.createElement("div");
             messageContent.innerHTML = message;
             messageContent.style.whiteSpace = "pre-wrap";
+            messageContent.style.fontFamily = "monospace";
             messageContent.classList.add("font-monospace");
             messageWrapper.appendChild(messageContent);
         } else {
