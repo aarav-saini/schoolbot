@@ -8,99 +8,223 @@
             href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
             rel="stylesheet" />
         <style>
+            /* Base styles for the chat window */
             .chat-window {
-                height: 70vh;
+                height: 70vh; /* Original height for chat messages */
                 overflow-y: auto;
                 border: 1px solid #e2e8f0;
                 border-radius: 0.375rem;
                 padding: 1rem;
             }
+            /* Utility class to hide elements */
             .hidden {
                 display: none;
             }
+
+            /* Styles for the chatbot popup container */
+            #chatbot-popup {
+                position: fixed; /* Fixed position on the screen */
+                bottom: 20px; /* 20px from the bottom */
+                right: 20px; /* 20px from the right */
+                width: 350px; /* Default compact width */
+                max-height: 50px; /* Compacted height (just the header) */
+                overflow: hidden; /* Hide content when compacted */
+                background-color: #ffffff; /* White background for the popup */
+                border-radius: 0.75rem; /* Rounded corners */
+                box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+                    0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Shadow for popup effect */
+                transition: max-height 0.3s ease-in-out, width 0.3s ease-in-out,
+                    box-shadow 0.3s ease-in-out; /* Smooth transitions */
+                z-index: 1000; /* Ensure it's above other content */
+            }
+
+            /* Styles for the expanded state of the popup */
+            #chatbot-popup.expanded {
+                max-height: 90vh; /* Max height when expanded (adjust as needed) */
+                width: 450px; /* Wider when expanded (adjust as needed) */
+                /* Optionally adjust shadow for expanded state */
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            }
+
+            /* Styles for the popup header (always visible) */
+            #popup-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.75rem 1rem;
+                background-color: #4299e1; /* Blue background for header */
+                color: white; /* White text color */
+                cursor: pointer; /* Indicate it's clickable */
+                border-top-left-radius: 0.75rem; /* Match popup border radius */
+                border-top-right-radius: 0.75rem; /* Match popup border radius */
+            }
+
+            /* Styles for the content area that gets hidden/shown */
+            #popup-content {
+                padding: 1rem;
+                /* No initial display: none; here, as its visibility is managed by JS on parent */
+            }
+
+            /* Adjust chat-window height for the popup context */
+            #chatbot-popup.expanded #chat-interface .chat-window {
+                height: calc(
+                    70vh - 150px
+                ); /* Adjust height to fit within popup, considering header/input/buttons */
+                max-height: 400px; /* A fixed max height for the chat window itself within the popup */
+            }
+
+            /* Responsive adjustments for smaller screens */
+            @media (max-width: 768px) {
+                #chatbot-popup {
+                    width: 90vw; /* Wider on small screens */
+                    right: 5vw; /* Centered horizontally */
+                    left: 5vw;
+                }
+                #chatbot-popup.expanded {
+                    width: 95vw; /* Even wider when expanded on small screens */
+                    right: 2.5vw;
+                    left: 2.5vw;
+                }
+                #chatbot-popup.expanded #chat-interface .chat-window {
+                    height: 60vh; /* More vertical space on smaller screens */
+                }
+            }
+
+            /* Chat Bubble Styles */
+            .message-bubble {
+                max-width: 80%;
+                padding: 0.75rem 1rem;
+                border-radius: 1.25rem; /* More rounded corners for bubbles */
+                margin-bottom: 0.5rem;
+                word-wrap: break-word; /* Ensure long words wrap */
+                white-space: pre-wrap; /* Preserve whitespace and line breaks */
+            }
+
+            .user-message {
+                background-color: #e0f2fe; /* Light blue for user messages */
+                align-self: flex-end; /* Align to the right */
+                margin-left: auto; /* Push to the right */
+            }
+
+            .bot-message {
+                background-color: #f0f0f0; /* Light gray for bot messages */
+                align-self: flex-start; /* Align to the left */
+                margin-right: auto; /* Push to the left */
+            }
+
+            /* Typing Indicator (3 dots) */
+            .typing-indicator-bubble {
+                background-color: #f0f0f0;
+                padding: 0.75rem 1rem;
+                border-radius: 1.25rem;
+                margin-bottom: 0.5rem;
+                display: inline-flex; /* Use inline-flex to center dots */
+                align-items: center;
+                justify-content: center;
+                width: fit-content; /* Adjust width to content */
+            }
+
+            .typing-indicator-bubble span {
+                display: inline-block;
+                width: 8px;
+                height: 8px;
+                background-color: #555;
+                border-radius: 50%;
+                margin: 0 2px;
+                animation: bounce 1.4s infinite ease-in-out;
+            }
+
+            .typing-indicator-bubble span:nth-child(1) {
+                animation-delay: -0.32s;
+            }
+            .typing-indicator-bubble span:nth-child(2) {
+                animation-delay: -0.16s;
+            }
+            .typing-indicator-bubble span:nth-child(3) {
+                animation-delay: 0s;
+            }
+
+            @keyframes bounce {
+                0%,
+                80%,
+                100% {
+                    transform: translateY(0);
+                }
+                40% {
+                    transform: translateY(-8px);
+                }
+            }
         </style>
     </head>
-    <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-5xl">
-            <h1 class="text-2xl font-bold mb-4 text-center">SPSMV Chatbot</h1>
-
-            <!-- Login Form -->
-            <div id="login-container" class="mb-4">
-                <p class="text-center text-gray-700 mb-4">
-                    Please enter your access token to continue.
-                </p>
-                <div class="flex flex-col mb-2">
-                    <label for="access-token-input" class="mb-1 text-gray-700"
-                        >Access Token:</label
-                    >
-                    <input
-                        type="password"
-                        id="access-token-input"
-                        class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter your access token" />
-                </div>
-                <button
-                    id="login-button"
-                    class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    Login
+    <body class="bg-gray-100">
+        <div id="chatbot-popup">
+            <div id="popup-header">
+                <h2 class="text-lg font-bold">📱 | NOVA – School Support</h2>
+                <button id="toggle-button" class="text-white text-xl font-bold">
+                    +
                 </button>
-                <div
-                    id="login-error-message"
-                    class="hidden text-center text-red-500 mt-2"></div>
             </div>
 
-            <!-- Modified: Chat Interface (initially hidden) -->
-            <div id="chat-interface" class="hidden">
-                <!-- !!! NEW: TTS Speed Control !!! -->
-                <div class="mb-4 flex items-center">
-                    <label for="tts-speed-slider" class="mr-2 text-gray-700"
-                        >TTS Speed:</label
-                    >
-                    <input
-                        type="range"
-                        id="tts-speed-slider"
-                        min="0.5"
-                        max="2.0"
-                        step="0.1"
-                        value="1.0"
-                        class="flex-grow accent-blue-500" />
-                    <span id="tts-speed-value" class="ml-2 text-gray-700"
-                        >1.0x</span
-                    >
+            <div id="popup-content" class="hidden">
+                <div id="login-container" class="mb-4">
+                    <p class="text-center text-gray-700 mb-4">
+                        Please enter your access token to continue.
+                    </p>
+                    <div class="flex flex-col mb-2">
+                        <label
+                            for="access-token-input"
+                            class="mb-1 text-gray-700"
+                            >Access Token:</label
+                        >
+                        <input
+                            type="password"
+                            id="access-token-input"
+                            class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Enter your access token" />
+                    </div>
+                    <button
+                        id="login-button"
+                        class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Login
+                    </button>
+                    <div
+                        id="login-error-message"
+                        class="hidden text-center text-red-500 mt-2"></div>
                 </div>
 
-                <div id="chat-window" class="chat-window mb-4"></div>
-                <div
-                    id="loading-indicator"
-                    class="hidden text-center text-blue-500 mb-2">
-                    Typing...
-                </div>
-                <div
-                    id="error-message"
-                    class="hidden text-center text-red-500 mb-2"></div>
-                <div class="flex">
-                    <input
-                        type="text"
-                        id="user-input"
-                        class="flex-grow p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Type your message..." />
+                <div id="chat-interface" class="hidden">
+                    <div id="chat-window" class="chat-window mb-4 flex flex-col">
+                        <div id="typing-indicator" class="hidden typing-indicator-bubble">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                    <div
+                        id="error-message"
+                        class="hidden text-center text-red-500 mb-2"></div>
+                    <div class="flex">
+                        <input
+                            type="text"
+                            id="user-input"
+                            class="flex-grow p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Type your message..." />
+                        <button
+                            id="send-button"
+                            class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            Send
+                        </button>
+                        <button
+                            id="voice-button"
+                            class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
+                            🎤
+                        </button>
+                    </div>
                     <button
-                        id="send-button"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Send
-                    </button>
-                    <button
-                        id="voice-button"
-                        class="ml-2 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500">
-                        🎤
+                        id="logout-button"
+                        class="w-full mt-4 bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                        Logout
                     </button>
                 </div>
-                <!-- Logout Button -->
-                <button
-                    id="logout-button"
-                    class="w-full mt-4 bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
-                    Logout
-                </button>
             </div>
         </div>
         <script src="script.js"></script>

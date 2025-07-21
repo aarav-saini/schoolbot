@@ -45,14 +45,26 @@ app.use((req, res, next) => {
             body.response &&
             typeof body.response === "string"
         ) {
+            let processedResponse = body.response;
+
+            // Step 1: Convert **bold** text to <b>bold</b> text
+            // This regex finds text wrapped in ** and captures the content to be put inside <b> tags
+            processedResponse = processedResponse.replace(
+                /\*\*(.*?)\*\*/g,
+                "<b>$1</b>"
+            );
+
+            // Step 2: Convert plain text newlines to HTML <br> tags
+            // This condition checks for existing HTML tags to avoid double-converting or breaking existing HTML
             if (
-                !body.response.includes("<br>") &&
-                !body.response.includes("<table") &&
-                !body.response.includes("<p>") &&
-                !body.response.includes("<div")
+                !processedResponse.includes("<br>") &&
+                !processedResponse.includes("<table") && // This original check remains
+                !processedResponse.includes("<p>") &&
+                !processedResponse.includes("<div")
             ) {
-                body.response = body.response.replace(/\n/g, "<br>");
+                processedResponse = processedResponse.replace(/\n/g, "<br>");
             }
+            body.response = processedResponse; // Assign the processed response back
         }
         originalJson.call(this, body);
     };
@@ -149,7 +161,8 @@ app.post("/ask", authenticateToken, async (req, res) => {
     console.log(`[${clientIp}] User query received: "${userPrompt}"`);
 
     try {
-        const systemInstruction = `You are a school receptionist. If the answer is not in the data, politely state that you do not have that information. Do not make up informatio. Never mention that you have been provided context. Always just give the answer from the given context, as if you were a trained AI model The current date is ${new Date().toDateString()}.`;
+        // MODIFIED: Added instruction to systemInstruction to avoid tables
+        const systemInstruction = `You are a school information bot. Always give responses in plain text, as if you were a real person. If the answer is not in the data, politely state that you do not have that information. Do not make up information. Never mention that you have been provided context. Always just give the answer from the given context, as if you were a trained AI model. The current date is ${new Date().toDateString()}.`;
 
         const responseStream = await ai.models.generateContentStream({
             model: "gemini-2.5-flash",

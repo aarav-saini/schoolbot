@@ -1,4 +1,3 @@
-// public/script.js - Frontend Logic
 document.addEventListener("DOMContentLoaded", () => {
     const loginContainer = document.getElementById("login-container");
     const accessTokenInput = document.getElementById("access-token-input");
@@ -7,23 +6,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const chatInterface = document.getElementById("chat-interface");
     const userInput = document.getElementById("user-input");
-    const sendButton = document.getElementById("send-button");
+    const sendButton = (document = document.getElementById("send-button"));
     const voiceButton = document.getElementById("voice-button");
     const chatWindow = document.getElementById("chat-window");
-    const loadingIndicator = document.getElementById("loading-indicator");
     const errorMessage = document.getElementById("error-message");
     const logoutButton = document.getElementById("logout-button");
 
-    // !!! NEW: TTS Speed Elements !!!
-    const ttsSpeedSlider = document.getElementById("tts-speed-slider");
-    const ttsSpeedValueSpan = document.getElementById("tts-speed-value");
-    let ttsSpeed = parseFloat(ttsSpeedSlider.value); // Initialize with slider's default value
+    let ttsSpeed = 1.3;
 
-    let recognition; // Variable for SpeechRecognition
-    let synth = window.speechSynthesis; // Variable for SpeechSynthesis
-    let indianVoice = null; // To store our chosen Indian voice
+    const chatbotPopup = document.getElementById("chatbot-popup");
+    const popupHeader = document.getElementById("popup-header");
+    const toggleButton = document.getElementById("toggle-button");
+    const popupContent = document.getElementById("popup-content");
 
-    // Function to set the Indian voice
+    let recognition;
+    let synth = window.speechSynthesis;
+    let indianVoice = null;
+
+    let speakResponseAfterSTT = false;
+    let currentBotMessageBubble = null; // To hold the reference to the bot's current bubble (for typing indicator)
+
     function setIndianVoice() {
         const voices = synth.getVoices();
         indianVoice = voices.find(
@@ -53,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
         setIndianVoice();
     }
 
-    // Check for Web Speech API browser support for STT
     if (
         !("webkitSpeechRecognition" in window) &&
         !("SpeechRecognition" in window)
@@ -74,8 +75,10 @@ document.addEventListener("DOMContentLoaded", () => {
             voiceButton.textContent = "🔴 Speaking...";
             voiceButton.classList.add("bg-red-500", "hover:bg-red-600");
             voiceButton.classList.remove("bg-green-500", "hover:bg-green-600");
-            loadingIndicator.classList.remove("hidden");
+            // Show typing indicator in a new bubble
+            showTypingIndicator();
             userInput.placeholder = "Listening...";
+            speakResponseAfterSTT = true;
         };
 
         recognition.onresult = (event) => {
@@ -89,23 +92,28 @@ document.addEventListener("DOMContentLoaded", () => {
             console.error("Speech recognition error:", event.error);
             errorMessage.textContent = `Speech recognition error: ${event.error}`;
             errorMessage.classList.remove("hidden");
-            loadingIndicator.classList.add("hidden");
+            hideTypingIndicator(true); // Hide and potentially remove the bubble
             voiceButton.textContent = "🎤";
             voiceButton.classList.add("bg-green-500", "hover:bg-green-600");
             voiceButton.classList.remove("bg-red-500", "hover:bg-red-600");
             userInput.placeholder = "Type your message...";
+            speakResponseAfterSTT = false;
         };
 
         recognition.onend = () => {
-            loadingIndicator.classList.add("hidden");
+            // Typing indicator is handled by sendMessage after user input
             voiceButton.textContent = "🎤";
             voiceButton.classList.add("bg-green-500", "hover:bg-green-600");
             voiceButton.classList.remove("bg-red-500", "hover:bg-red-600");
             userInput.placeholder = "Type your message...";
+            // speakResponseAfterSTT should already be false if sendMessage was called.
+            // If recognition ends without sending a message (e.g., no speech), hide indicator.
+            if (userInput.value === "" && currentBotMessageBubble) {
+                hideTypingIndicator(true);
+            }
         };
     }
 
-    // TTS Function
     function speakText(text) {
         if (!synth || !indianVoice) {
             console.warn("Speech Synthesis or Indian voice not ready.");
@@ -115,7 +123,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.voice = indianVoice;
         utterance.lang = indianVoice.lang;
-        utterance.rate = ttsSpeed; // !!! NEW: Apply TTS speed !!!
+        utterance.rate = ttsSpeed;
 
         utterance.onerror = (event) => {
             console.error("SpeechSynthesisUtterance.onerror", event.error);
@@ -124,46 +132,100 @@ document.addEventListener("DOMContentLoaded", () => {
         synth.speak(utterance);
     }
 
-    function appendMessage(
-        sender,
-        message,
-        senderColor,
-        isHtml = false,
-        speak = false
-    ) {
-        const messageWrapper = document.createElement("div");
-        messageWrapper.classList.add("mb-2");
+    // Modified appendMessage to only add user messages
+    function appendMessage(sender, message, isHtml = false) {
+        const messageBubble = document.createElement("div");
+        messageBubble.classList.add("message-bubble");
 
-        const senderSpan = document.createElement("span");
-        senderSpan.classList.add("font-semibold", senderColor);
-        senderSpan.textContent = `${sender}: `;
+        if (sender === "User") {
+            messageBubble.classList.add("user-message");
+            if (isHtml) {
+                messageBubble.innerHTML = message;
+            } else {
+                messageBubble.textContent = message;
+            }
+            chatWindow.appendChild(messageBubble);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+        // Bot messages are handled by showTypingIndicator and updateBotMessageBubble
+    }
 
-        messageWrapper.appendChild(senderSpan);
-
-        if (isHtml) {
-            const messageContent = document.createElement("div");
-            messageContent.innerHTML = message;
-            messageContent.style.whiteSpace = "pre-wrap";
-            messageContent.style.fontFamily = "monospace";
-            messageContent.classList.add("font-monospace");
-            messageWrapper.appendChild(messageContent);
-        } else {
-            const textNode = document.createTextNode(message);
-            messageWrapper.appendChild(textNode);
+    // New function to show typing indicator inside a new bot bubble
+    function showTypingIndicator() {
+        if (currentBotMessageBubble) {
+            // If an old typing indicator bubble exists, remove it first
+            currentBotMessageBubble.remove();
+            currentBotMessageBubble = null;
         }
 
-        chatWindow.appendChild(messageWrapper);
+        currentBotMessageBubble = document.createElement("div");
+        currentBotMessageBubble.classList.add("message-bubble", "bot-message");
+        currentBotMessageBubble.innerHTML = `
+            <div class="typing-indicator-bubble">
+                <span></span><span></span><span></span>
+            </div>
+        `;
+        chatWindow.appendChild(currentBotMessageBubble);
         chatWindow.scrollTop = chatWindow.scrollHeight;
+        sendButton.disabled = true;
+        voiceButton.disabled = true;
+    }
 
-        if (speak && sender === "Bot") {
-            const textOnlyMessage = message.replace(/<[^>]*>/g, "");
-            speakText(textOnlyMessage);
+    // New function to update the bot message bubble with actual content
+    function updateBotMessageBubble(message, isHtml = false, speak = false) {
+        if (currentBotMessageBubble) {
+            if (isHtml) {
+                currentBotMessageBubble.innerHTML = message;
+            } else {
+                currentBotMessageBubble.textContent = message;
+            }
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+
+            if (speak) {
+                const textOnlyMessage = message.replace(/<[^>]*>/g, "");
+                speakText(textOnlyMessage);
+            }
+            currentBotMessageBubble = null; // Clear reference after updating
+        } else {
+            // Fallback if somehow typing indicator wasn't shown, append as new message
+            const messageBubble = document.createElement("div");
+            messageBubble.classList.add("message-bubble", "bot-message");
+            if (isHtml) {
+                messageBubble.innerHTML = message;
+            } else {
+                messageBubble.textContent = message;
+            }
+            chatWindow.appendChild(messageBubble);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            if (speak) {
+                const textOnlyMessage = message.replace(/<[^>]*>/g, "");
+                speakText(textOnlyMessage);
+            }
         }
+        sendButton.disabled = false;
+        voiceButton.disabled = false;
+    }
+
+    // New function to hide and optionally remove the typing indicator bubble
+    function hideTypingIndicator(removeBubble = false) {
+        if (currentBotMessageBubble) {
+            if (removeBubble) {
+                currentBotMessageBubble.remove();
+            } else {
+                // If not removing, clear content (though usually it will be replaced)
+                currentBotMessageBubble.innerHTML = "";
+            }
+            currentBotMessageBubble = null;
+        }
+        sendButton.disabled = false;
+        voiceButton.disabled = false;
     }
 
     async function sendMessage() {
         const prompt = userInput.value.trim();
         const storedAccessToken = localStorage.getItem("accessToken");
+
+        const shouldSpeakThisResponse = speakResponseAfterSTT;
 
         if (!prompt) {
             return;
@@ -172,15 +234,21 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!storedAccessToken) {
             errorMessage.textContent = "Not logged in. Please log in to chat.";
             errorMessage.classList.remove("hidden");
+            updateBotMessageBubble(
+                "Not logged in. Please log in to chat.",
+                false,
+                false
+            );
             return;
         }
 
         errorMessage.classList.add("hidden");
-        appendMessage("User", prompt, "text-gray-800", false);
+        appendMessage("User", prompt, false); // Append user message first
         userInput.value = "";
-        loadingIndicator.classList.remove("hidden");
-        sendButton.disabled = true;
-        voiceButton.disabled = true;
+
+        showTypingIndicator(); // Show typing indicator in a new bot bubble
+
+        speakResponseAfterSTT = false;
 
         try {
             const response = await fetch("/ask", {
@@ -206,28 +274,27 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             const data = await response.json();
-            appendMessage("Bot", data.response, "text-blue-600", true, true);
+            updateBotMessageBubble(
+                data.response,
+                true, // isHtml true for bot responses
+                shouldSpeakThisResponse
+            );
         } catch (error) {
             console.error("Error sending message:", error);
             errorMessage.textContent =
                 error.message || "An unexpected error occurred.";
             errorMessage.classList.remove("hidden");
-            appendMessage(
-                "Bot",
+            updateBotMessageBubble(
                 "Sorry, I encountered an error. Please try again.",
-                "text-red-500",
                 false,
-                true
+                false
             );
         } finally {
-            loadingIndicator.classList.add("hidden");
-            sendButton.disabled = false;
-            voiceButton.disabled = false;
+            // Cleanup and enable controls. updateBotMessageBubble already does this.
             userInput.focus();
         }
     }
 
-    // Login Function
     async function login() {
         const accessToken = accessTokenInput.value.trim();
         loginErrorMessage.classList.add("hidden");
@@ -257,10 +324,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             localStorage.setItem("accessToken", accessToken);
             showChatInterface();
-            appendMessage(
-                "Bot",
+            updateBotMessageBubble(
+                // Use updateBotMessageBubble for initial message as well
                 "Hello! How can I assist you with SPSMV school information today?",
-                "text-blue-600",
                 false,
                 false
             );
@@ -272,13 +338,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // UI Visibility Functions
     function showLoginScreen() {
         loginContainer.classList.remove("hidden");
         chatInterface.classList.add("hidden");
         accessTokenInput.focus();
         loginErrorMessage.classList.add("hidden");
-        chatWindow.innerHTML = "";
+        chatWindow.innerHTML = ""; // Clear all messages including any old typing indicator
+        currentBotMessageBubble = null; // Clear reference
     }
 
     function showChatInterface() {
@@ -287,7 +353,6 @@ document.addEventListener("DOMContentLoaded", () => {
         errorMessage.classList.add("hidden");
     }
 
-    // Logout Function
     function logoutUser(showAuthError = false) {
         localStorage.removeItem("accessToken");
         showLoginScreen();
@@ -298,7 +363,45 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Event Listeners
+    let isExpanded = false;
+
+    function toggleChatbotPopup() {
+        isExpanded = !isExpanded;
+        if (isExpanded) {
+            chatbotPopup.classList.add("expanded");
+            popupContent.classList.remove("hidden");
+            toggleButton.textContent = "-";
+            if (localStorage.getItem("accessToken")) {
+                userInput.focus();
+            } else {
+                accessTokenInput.focus();
+            }
+            // Check if there are *any* messages (not just initial setup)
+            if (
+                chatWindow.children.length === 0 &&
+                localStorage.getItem("accessToken")
+            ) {
+                updateBotMessageBubble(
+                    "Welcome back! How can I assist you with SPSMV school information today?",
+                    false,
+                    false
+                );
+            }
+        } else {
+            chatbotPopup.classList.remove("expanded");
+            popupContent.classList.add("hidden");
+            toggleButton.textContent = "+";
+            if (synth.speaking) {
+                synth.cancel();
+            }
+            if (recognition && recognition.listening) {
+                recognition.stop();
+            }
+            speakResponseAfterSTT = false;
+            hideTypingIndicator(true); // Ensure typing indicator is removed when closing
+        }
+    }
+
     loginButton.addEventListener("click", login);
     logoutButton.addEventListener("click", () => logoutUser(false));
 
@@ -308,13 +411,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    sendButton.addEventListener("click", sendMessage);
+    sendButton.addEventListener("click", () => {
+        sendMessage();
+    });
 
     voiceButton.addEventListener("click", () => {
         if (recognition) {
             if (synth.speaking) {
                 synth.cancel();
             }
+            speakResponseAfterSTT = true;
             recognition.start();
         }
     });
@@ -325,25 +431,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // !!! NEW: TTS Speed Slider Event Listener !!!
-    ttsSpeedSlider.addEventListener("input", (event) => {
-        ttsSpeed = parseFloat(event.target.value);
-        ttsSpeedValueSpan.textContent = `${ttsSpeed.toFixed(1)}x`; // Update display
+    popupHeader.addEventListener("click", toggleChatbotPopup);
+    toggleButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleChatbotPopup();
     });
 
-    // On page load, check if already logged in
+    // Initial load state
     const initialToken = localStorage.getItem("accessToken");
     if (initialToken) {
         showChatInterface();
-        appendMessage(
-            "Bot",
-            "Welcome back! How can I assist you with SPSMV school information today?",
-            "text-blue-600",
-            false,
-            false
-        );
-        userInput.focus();
+        // Append initial bot message if not already present
+        if (chatWindow.children.length === 0) {
+            updateBotMessageBubble(
+                "Hello! How can I assist you with SPSMV school information today?",
+                false,
+                false
+            );
+        }
     } else {
         showLoginScreen();
     }
+    chatbotPopup.classList.remove("expanded");
+    popupContent.classList.add("hidden");
+    toggleButton.textContent = "+";
 });
